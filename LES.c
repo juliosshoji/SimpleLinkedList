@@ -9,12 +9,17 @@ struct Node {
 typedef struct Node Tnode;
 
 int InsertNodeFinal(Tnode* List, int info);
-int InsertNodeAny(int pos, Tnode* List, int info);
-int RemoveNode(int pos, Tnode* List);
-int EditNode(int pos, Tnode* List, int info);
-int GetNodeInfo(int pos, Tnode* List, int* info);
-void printList(Tnode* List);
-void ExitProgram(Tnode* List);
+int InsertNodeStart(Tnode* List, int info);
+int InsertNodeAny(Tnode* List, int pos, int info);
+int RemoveNode(Tnode* List, int pos);
+int RemoveNodeFinal(Tnode* List);
+int RemoveNodeStart(Tnode* List);
+int EditNode(Tnode* List, int pos, int info);
+int GetNodeInfo(Tnode* List, int pos, int* info);
+int printList(Tnode* List);
+int ExitProgram(Tnode* List);
+
+void drawLine();
 
 int main(int argc, char* argv[]){
 
@@ -33,10 +38,12 @@ int main(int argc, char* argv[]){
         printf("0. Exit\n");
         printf("1. Insert new node at the End\n");
         printf("2. Insert new node in a given position\n");
-        printf("3. Remove Node\n");
-        printf("4. Change data on node\n");
-        printf("5. Print Linked List\n");
-        printf("6. Get node info\n\n\n");
+        printf("3. Insert Node at the Start\n");
+        printf("4. Remove Node anywhere\n");
+        printf("5. Remove node at the end\n");
+        printf("6. Change data on node\n");
+        printf("7. Print Linked List\n");
+        printf("8. Get node info\n\n\n");
         
         scanf("%d", &option);
 
@@ -60,36 +67,51 @@ int main(int argc, char* argv[]){
                 scanf("%d", &info);
                 printf("What position?\n");
                 scanf("%d", &pos);
-                if(InsertNodeAny(pos, List, info) != 0){
+                if(InsertNodeAny(List, pos, info) != 0){
                     printf("An error ocurred, exiting!\n");
                     return 1;
                 };
                 break;
             case 3:
-                printf("What node to remove?\n");
-                scanf("%d", &pos);
-                if(RemoveNode(pos, List) != 0){
+                printf("What info to store a new node at start?\n");
+                scanf("%d", &info);
+                if(InsertNodeStart(List, info) != 0){
                     printf("An error ocurred, exiting!\n");
                     return 1;
                 }
                 break;
             case 4:
-                printf("What node do you want to change?\n");
-                scanf("%d",&pos);
-                printf("What info do you want to put in it?\n");
-                scanf("%d", &info);
-                if(EditNode(pos, List, info) != 0){
+                printf("What node to remove?\n");
+                scanf("%d", &pos);
+                if(RemoveNode(List, pos) != 0){
                     printf("An error ocurred, exiting!\n");
                     return 1;
                 }
                 break;
             case 5:
-                printList(List);
+                if(RemoveNodeFinal(List) != 0){
+                    printf("An error ocurred exiting!\n");
+                    return 1;
+                }
                 break;
             case 6:
+                printf("What node do you want to change?\n");
+                scanf("%d",&pos);
+                printf("What info do you want to put in it?\n");
+                scanf("%d", &info);
+                if(EditNode(List, pos, info) == 1){
+                    printf("Try again\n");
+                }
+                break;
+            case 7:
+                if(printList(List) != 0){
+                    printf("An error ocurred!\n");
+                };
+                break;
+            case 8:
                 printf("Where to look for info?\n");
                 scanf("%d", &pos);
-                if(GetNodeInfo(pos, List, &info) == 2){
+                if(GetNodeInfo(List, pos, &info) == 2){
                     printf("List too short!\n");
                     break;
                 }
@@ -104,7 +126,7 @@ int main(int argc, char* argv[]){
 }
 
 
-int InsertNodeAny(int pos, Tnode* List, int info){
+int InsertNodeAny(Tnode* List, int pos, int info){
     
     if(pos == 1){  
         Tnode* AuxN = List->Next;
@@ -123,13 +145,28 @@ int InsertNodeAny(int pos, Tnode* List, int info){
             printf("List not long enough! Try usign add to Last Node\n");
             return 0;
         }
-        InsertNodeAny(--pos, List->Next, info);
+        InsertNodeAny(List->Next, --pos, info);
     }
 
     return 0;
 };
 
-int GetNodeInfo(int pos, Tnode* List, int* info){
+int InsertNodeStart(Tnode* List, int info){
+
+    Tnode* NewNode = (Tnode*)malloc(sizeof(Tnode));
+    if(NewNode == NULL){
+        printf("Error alocating memory!\n");
+        return 1;
+    }
+
+    NewNode->Next = List->Next;
+    NewNode->data = info;
+    List->Next = NewNode;
+
+    return 0;
+};
+
+int GetNodeInfo(Tnode* List, int pos, int* info){
     
     pos--;
     if(List->Next == NULL){
@@ -140,7 +177,7 @@ int GetNodeInfo(int pos, Tnode* List, int* info){
         return 1;
     }
     
-    return GetNodeInfo(pos, List->Next, info);
+    return GetNodeInfo(List->Next, pos, info);
 };
 
 int InsertNodeFinal(Tnode* List, int info){
@@ -166,33 +203,35 @@ int InsertNodeFinal(Tnode* List, int info){
     return 0;
 };
 
-void printList(Tnode* List){
+int printList(Tnode* List){
 
     printf("\n\n");
 
     if(List->Next == NULL){
         printf("List is too short!\n");
-        return;
+        return 1;
     }
+
+    int index = 1;
 
     Tnode* aux;
     aux = List->Next;
     while(aux->Next != NULL){
 
-        printf("%d\n", aux->data);
+        printf("%d) %d\n", index, aux->data);
         aux = aux->Next;
-        
+        index++;
     }
 
-    printf("%d\n", aux->data);
+    printf("%d) %d\n",index, aux->data);
 
     printf("\n\n");
     getchar();
 
-    return;
+    return 0;
 };
 
-int RemoveNode(int pos, Tnode* List){
+int RemoveNode(Tnode* List, int pos){
 
     Tnode* aux;
     int index = 0;
@@ -210,14 +249,24 @@ int RemoveNode(int pos, Tnode* List){
     free(aux);
 
     return 0;
-}
+};
 
-int EditNode(int pos, Tnode* List, int info){
+int RemoveNodeFinal(Tnode* List){
+
+    if((List->Next)->Next == NULL){
+        free(List->Next);
+        List->Next = NULL;
+        return 0;
+    }
+    return RemoveNodeFinal(List->Next);
+};
+
+int EditNode(Tnode* List, int pos, int info){
 
     Tnode* aux;
     int index = 0;
     while(pos > 0){
-        if(List->Next){
+        if(List->Next == NULL){
             printf("Error finding node!\n");
             return 1;
         }
@@ -230,7 +279,7 @@ int EditNode(int pos, Tnode* List, int info){
     return 0;
 };
 
-void ExitProgram(Tnode* List){
+int ExitProgram(Tnode* List){
 
     Tnode* aux;
 
@@ -242,4 +291,13 @@ void ExitProgram(Tnode* List){
 
     free(List);
 
+    return 0;
+};
+
+void drawLine(){
+    printf("\n");
+    for(int index = 0; index < 25; index++){
+        printf("*");
+    }
+    printf("\n");
 };
