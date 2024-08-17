@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 struct Node {
     int data;
@@ -40,7 +41,7 @@ int main(int argc, char* argv[]){
     
     while(1){
 
-        printf("\n\n\tChosse List option\n\n");
+        printf("\n\n\tChose List option\n\n");
         printf("0. Exit\n");
         printf("1. Initialize List\n");
         printf("2. Reinitialize List\n");
@@ -52,7 +53,9 @@ int main(int argc, char* argv[]){
         printf("8. Change data on node\n");
         printf("9. Print Linked List\n");
         printf("10. Get node info\n");
-        printf("11. Print size of the list\n\n");
+        printf("11. Print size of the list\n");
+        printf("12. Store current List on disk\n");
+        printf("13. Read List from disk (will reinitialize current list on memory)\n\n");
         
         scanf("%d", &option);
 
@@ -60,7 +63,7 @@ int main(int argc, char* argv[]){
         {
             case 0:
                 ExitProgram(&List);
-                printf("Saindo\n");
+                printf("Exiting!\n");
                 return 0;
             case 1:
                 if(InitializeList(&List) != 0){
@@ -72,6 +75,7 @@ int main(int argc, char* argv[]){
                 if(ReInitializeList(&List) != 0){
                     printf("An error ocurred trying to reinitialize the list!\n");
                 }
+                printf("List reinitialized!\n");
                 break;
             case 3:
                 getchar();
@@ -139,6 +143,19 @@ int main(int argc, char* argv[]){
                 break;
             case 11:
                 printf("\nThe size of the list is: %d node(s)\n", sizeList(&List));
+                break;
+            case 12:
+                if(storeListOnDisk(&List) != 0){
+                    printf("An error ocurred, try again!\n");
+                };
+                printf("\nSucess!\n");
+                break;
+            case 13:
+                if(readListFromDisk(&List) != 0){
+                    printf("An error ocurred, exiting!\n");
+                    ExitProgram(&List);
+                    exit(1);
+                }
                 break;
             default:
                 printf("Try a valid response!\n");
@@ -387,8 +404,129 @@ int sizeList(Tnode** List){
 
 int storeListOnDisk(Tnode** List){
 
-    FILE* listOnDisk =
+    Tnode* aux = *List;
+    int condition = 0;
+    char* filename = (char*)malloc(25*sizeof(char));
+    if(filename == NULL){
+        printf("Failed to alocate memory!\n");
+        return 1;
+    }
+
+    do{
+        printf("\nGive a name to the list (no special characters and no space): ");
+        scanf("%s", filename);
+
+        for(int index = 0; filename[index] != 0; index++){
+            if ((filename[index] < 41 || filename[index] > 90) && (filename[index] < 97 || filename[index] > 122))
+            {
+                printf("\nTry a compatible name!\n");
+                condition = 1;
+            }
+        
+    }
+    }while(condition);
+
+    strcat(filename, ".txt\0");
+
+    FILE* listOnDisk = fopen(filename, "w");
+    if(listOnDisk == NULL){
+        printf("Failed to open file!\n");
+        return 1;
+    }
+
+    free(filename);
+
+    while(aux->Next != NULL)
+    {
+        fprintf(listOnDisk, "%d\n", aux->data);
+        aux = aux->Next;
+    }
+
+    fprintf(listOnDisk, "%d\n", aux->data);
+
+    fclose(listOnDisk);
+
+    return 0;
+    
 };
 
-int readListFromDisk(Tnode** List){};
+int readListFromDisk(Tnode** List){
+    
+    getchar();
+    printf("\nReading List from disk REQUIRES reinitialization of memory List!\nAre you sure you want to do that?[y/n]\n");
+    if(getchar() != 121){
+        printf("\nOK! Consider saving memory list before reading other from disk!\n");
+        return 0;
+    }
+
+    ReInitializeList(List);
+
+    Tnode* aux = *List;
+
+    int condition = 0;
+    char* filename = (char*)malloc(25*sizeof(char));
+    if(filename == NULL){
+        printf("Failed to alocate memory!\n");
+        return 1;
+    }
+
+    do{
+        printf("\nWhat is the name of the list (no special characters and no space): ");
+        scanf("%s", filename);
+
+        for(int index = 0; filename[index] != 0; index++){
+            if ((filename[index] < 41 || filename[index] > 90) && (filename[index] < 97 || filename[index] > 122))
+            {
+                printf("\nTry a compatible name!\n");
+                condition = 1;
+            }
+        
+    }
+    }while(condition);
+
+    strcat(filename, ".txt\0");
+
+    FILE* listFromDisk = fopen(filename, "r");
+    if(listFromDisk == NULL){
+        printf("Could not open/find list file!\n");
+        return 1;
+    }
+
+    free(filename);
+
+    int info = 0;
+
+    if(fscanf(listFromDisk, "%d\n", &aux->data) != EOF){
+
+        condition = 1;
+
+        while (condition)
+        {
+            if(fscanf(listFromDisk, "%d\n", &info) == EOF){
+                condition = 0;
+            }
+            else
+            {
+                aux->Next = (Tnode*)malloc(sizeof(Tnode));
+                if(aux->Next == NULL){
+                    printf("Failed to alocate memory!\n");
+                    return 1;
+                }
+
+                aux = aux->Next;
+                aux->data = info;
+                aux->Next = NULL;
+
+                condition = 1;
+            }
+            
+
+        }
+    }
+    
+    printList(List);
+
+    return 0;
+
+};
 
