@@ -74,6 +74,7 @@ int main(int argc, char* argv[]){
                     return 1;
                 };
                 printf("\nList initialized!\n");
+                break;
             case 2:
                 if(ReInitializeList(&List) != 0){
                     printf("An error ocurred trying to reinitialize the list!\n");
