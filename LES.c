@@ -41,8 +41,9 @@ int main(int argc, char* argv[]){
     
     while(1){
 
-        printf("\n\n\tChose List option\n\n");
-        printf("0. Exit\n");
+        printf("\n\n\tChose List option\n");
+        drawLine();
+        printf("\n0. Exit\n");
         printf("1. Initialize List\n");
         printf("2. Reinitialize List\n");
         printf("3. Insert new node at the End\n");
@@ -55,7 +56,9 @@ int main(int argc, char* argv[]){
         printf("10. Get node info\n");
         printf("11. Print size of the list\n");
         printf("12. Store current List on disk\n");
-        printf("13. Read List from disk (will reinitialize current list on memory)\n\n");
+        printf("13. Read List from disk (will reinitialize current list on memory)\n");
+        drawLine();
+        printf("\n");
         
         scanf("%d", &option);
 
@@ -175,7 +178,7 @@ int InitializeList(Tnode** List){
     }
 
     Tnode* aux = *List;
-    aux->data = 0;
+    aux->data = 202;
     aux->Next = NULL;
 
     return 0;
@@ -354,7 +357,7 @@ int EditNode(Tnode** List, int pos, int info){
     
     while(pos > 1){
         if(aux->Next == NULL){
-            printf("Error finding node!\n");
+            printf("\nError finding node!\n");
             return 1;
         }
         aux = aux->Next;
@@ -382,7 +385,7 @@ int ExitProgram(Tnode** List){
 
 void drawLine(){
     printf("\n");
-    for(int index = 0; index < 25; index++){
+    for(int index = 0; index < 75; index++){
         printf("*");
     }
     printf("\n");
@@ -408,7 +411,7 @@ int storeListOnDisk(Tnode** List){
     int condition = 0;
     char* filename = (char*)malloc(25*sizeof(char));
     if(filename == NULL){
-        printf("Failed to alocate memory!\n");
+        printf("\nFailed to alocate memory!\n");
         return 1;
     }
 
@@ -447,7 +450,7 @@ int storeListOnDisk(Tnode** List){
     fclose(listOnDisk);
 
     return 0;
-    
+
 };
 
 int readListFromDisk(Tnode** List){
@@ -466,7 +469,7 @@ int readListFromDisk(Tnode** List){
     int condition = 0;
     char* filename = (char*)malloc(25*sizeof(char));
     if(filename == NULL){
-        printf("Failed to alocate memory!\n");
+        printf("\nFailed to alocate memory!\n");
         return 1;
     }
 
@@ -488,7 +491,7 @@ int readListFromDisk(Tnode** List){
 
     FILE* listFromDisk = fopen(filename, "r");
     if(listFromDisk == NULL){
-        printf("Could not open/find list file!\n");
+        printf("\nCould not open/find list file!\n");
         return 1;
     }
 
@@ -509,7 +512,7 @@ int readListFromDisk(Tnode** List){
             {
                 aux->Next = (Tnode*)malloc(sizeof(Tnode));
                 if(aux->Next == NULL){
-                    printf("Failed to alocate memory!\n");
+                    printf("\nFailed to alocate memory!\n");
                     return 1;
                 }
 
